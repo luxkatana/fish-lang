@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'hichat'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=hichat",
+                    "--package=hichat"
+                ],
+                "filter": {
+                    "name": "hichat",
+                    "kind": "bin"
+                }
+            },
+            "args": ["testfile.hy"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'hichat'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=hichat",
+                    "--package=hichat"
+                ],
+                "filter": {
+                    "name": "hichat",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
