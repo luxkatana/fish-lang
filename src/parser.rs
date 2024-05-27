@@ -6,8 +6,6 @@ pub enum NodeType {
     ExpressionIdent,
     Exit,
     Variable,
-    BinaryExpressionAdd,
-    BinaryExpressionMul
 }
 pub trait Node: Any {
     fn as_any(&self) -> &dyn Any;
@@ -16,32 +14,7 @@ pub trait Node: Any {
 pub struct NodeExpressionInt {
     pub int_literal: Token,
 }
-pub struct NodeBinaryExpressionAdd {
-    pub left: ExpressionTypes,
-    pub right: ExpressionTypes
-}
-impl Node for NodeBinaryExpressionAdd {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn nodetype(&self) -> NodeType {
-        NodeType::BinaryExpressionAdd
-    }
-}
 
-pub struct NodeBinaryExpressionMul {
-    pub left: ExpressionTypes,
-    pub right: ExpressionTypes
-}
-impl Node for NodeBinaryExpressionMul {
-    fn nodetype(&self) -> NodeType {
-        NodeType::BinaryExpressionMul
-        
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
 impl Node for NodeExpressionInt {
     fn as_any(&self) -> &dyn Any {
         self
@@ -116,11 +89,9 @@ impl Parser {
                         } else if matches!(self.peek(0).unwrap().t_type, TokenType::Identifier) {
                             // nodes.push(Box::new(NodeExpressionIdentifier))
                             nodes.push(Box::new(NodeExit {
-                                expr: ExpressionTypes::Identifier(
-                                    NodeExpressionIdentifier {
-                                        ident: self.peek(0).unwrap(),
-                                    },
-                                ),
+                                expr: ExpressionTypes::Identifier(NodeExpressionIdentifier {
+                                    ident: self.peek(0).unwrap(),
+                                }),
                             }));
                         }
                     } else {
@@ -178,9 +149,9 @@ impl Parser {
                                     })),
                                     TokenType::IntegerLiteral => {
                                         nodes.push(Box::new(NodeExit {
-                                            expr: ExpressionTypes::Int(
-                                                NodeExpressionInt { int_literal: inner },
-                                            ),
+                                            expr: ExpressionTypes::Int(NodeExpressionInt {
+                                                int_literal: inner,
+                                            }),
                                         }));
                                     }
                                     _ => {}
@@ -190,7 +161,7 @@ impl Parser {
                             return Err("exit() must have one parameter".to_string());
                         }
                     }
-                },
+                }
                 _ => {}
             };
         }

@@ -1,13 +1,13 @@
-mod tokenizer;
 mod generation;
 mod parser;
-use std::io::Write;
-use std::{env::args, process::Command};
-use std::process::exit;
-use parser::Parser;
-use tokenizer::Tokenizer;
+mod tokenizer;
 use generation::CodeGeneration;
+use parser::Parser;
 use std::fs::{read_to_string as read_file, File};
+use std::io::Write;
+use std::process::exit;
+use std::{env::args, process::Command};
+use tokenizer::Tokenizer;
 fn main() {
     let arguments: Vec<String> = args().collect();
     if arguments.len() != 2 {
@@ -15,11 +15,11 @@ fn main() {
         exit(1);
     }
     let filedata = read_file(&arguments[1])
-                        .expect(format!("Could not read file from {}", arguments[1]).as_str());
+        .expect(format!("Could not read file from {}", arguments[1]).as_str());
     if filedata.len() == 0 {
         exit(0);
     }
-    
+
     let mut tokenizer = Tokenizer::new(filedata);
     let tokens = match tokenizer.tokenize() {
         Ok(e) => e,
@@ -63,9 +63,7 @@ fn main() {
         .arg("dump.o")
         .status()
         .expect("Could not link to binary");
-
 }
-
 
 fn clean_bin() {
     if let Ok(files) = std::fs::read_dir("bin/") {

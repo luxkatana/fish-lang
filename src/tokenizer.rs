@@ -11,7 +11,7 @@ pub enum TokenType {
 #[derive(Clone, Debug)]
 pub struct Token {
     pub t_type: TokenType,
-    pub value: Option<String>
+    pub value: Option<String>,
 }
 pub struct Tokenizer {
     inputdata: String,
@@ -26,15 +26,14 @@ impl Tokenizer {
     }
     pub fn tokenize(&mut self) -> Result<Vec<Token>, String> {
         let mut tokens: Vec<Token> = vec![];
-        let mut buffer = String::new(); 
+        let mut buffer = String::new();
         while let Some(mut character) = self.consume() {
             if character == '#' {
                 while character != '\n' {
                     if let Some(s) = self.consume() {
                         character = s;
-                    }
-                    else {
-                        break
+                    } else {
+                        break;
                     }
                 }
                 continue;
@@ -48,76 +47,64 @@ impl Tokenizer {
                     buffer.push(character);
                     if let Some(new_char) = self.consume() {
                         character = new_char;
-                    }
-                    else {
+                    } else {
                         break;
                     }
                 }
                 if buffer == "return" {
                     tokens.push(Token {
                         t_type: TokenType::Return,
-                        value: None
+                        value: None,
                     });
-                }
-                else if buffer == "let" {
+                } else if buffer == "let" {
                     tokens.push(Token {
                         t_type: TokenType::LetKeyword,
-                        value: None
+                        value: None,
                     });
-                }
-                else {
+                } else {
                     tokens.push(Token {
                         t_type: TokenType::Identifier,
-                        value: Some(buffer.clone())
+                        value: Some(buffer.clone()),
                     })
                 }
                 buffer.clear();
                 self.pointer_index -= 1;
-            }
-            else if character.is_numeric() {
+            } else if character.is_numeric() {
                 while character.is_numeric() {
-                    
                     buffer.push(character);
                     if let Some(_) = self.peek(0) {
                         character = self.consume().unwrap();
-                    }
-                    else {
+                    } else {
                         break;
                     }
                 }
                 tokens.push(Token {
                     t_type: TokenType::IntegerLiteral,
-                    value: Some(buffer.clone())
+                    value: Some(buffer.clone()),
                 });
                 buffer.clear();
                 self.pointer_index -= 1; // one to far
-            }
-            else if character == '=' {
+            } else if character == '=' {
                 tokens.push(Token {
                     t_type: TokenType::Equal,
-                    value: None
+                    value: None,
                 });
-            }
-            else if character == '(' {
+            } else if character == '(' {
                 tokens.push(Token {
                     t_type: TokenType::OpenParam,
-                    value: None
+                    value: None,
                 });
-            }
-            else if character == ')' {
+            } else if character == ')' {
                 tokens.push(Token {
                     t_type: TokenType::CloseParam,
-                    value: None
+                    value: None,
                 });
-            }
-
-            else {
+            } else {
                 return Err(format!("Weird character: '{character}'"));
             }
         }
 
         Ok(tokens)
-
     }
     fn consume(&mut self) -> Option<char> {
         let x = self.peek(0);
@@ -125,8 +112,8 @@ impl Tokenizer {
         x
     }
     fn peek(&self, offset: usize) -> Option<char> {
-        self.inputdata.chars().nth(offset + (self.pointer_index as usize))
+        self.inputdata
+            .chars()
+            .nth(offset + (self.pointer_index as usize))
     }
 }
-
-
