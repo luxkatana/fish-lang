@@ -7,6 +7,7 @@ pub enum TokenType {
     Equal,
     OpenParam,
     CloseParam,
+    Newline
 }
 #[derive(Clone, Debug)]
 pub struct Token {
@@ -38,7 +39,14 @@ impl Tokenizer {
                 }
                 continue;
             }
-            if character.is_ascii_whitespace() {
+            if character == '\n' {
+                tokens.push(Token {
+                    t_type: TokenType::Newline,
+                    value: None
+                });
+                continue;
+            }
+            else if character.is_ascii_whitespace() {
                 continue;
             }
 

@@ -21,25 +21,6 @@
             },
             "args": ["testfile.hy"],
             "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'hichat'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=hichat",
-                    "--package=hichat"
-                ],
-                "filter": {
-                    "name": "hichat",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
         }
     ]
 }

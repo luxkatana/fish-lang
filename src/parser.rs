@@ -66,12 +66,14 @@ impl Node for NodeExit {
 pub struct Parser {
     tokens: Vec<Token>,
     pointer_index: usize,
+    filename: String
 }
 impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Self {
+    pub fn new(tokens: Vec<Token>, filename: String) -> Self {
         Self {
             tokens,
             pointer_index: 0,
+            filename
         }
     }
     fn parse_expression(&mut self) -> Option<ExpressionTypes> {
@@ -92,9 +94,14 @@ impl Parser {
         }
     }
     pub fn create_nodes(&mut self) -> Result<Vec<Box<dyn Node>>, String> {
+        let mut line_count: usize = 1;
         let mut nodes: Vec<Box<dyn Node>> = vec![];
         while let Some(token) = self.peek(0) {
             match token.t_type {
+                TokenType::Newline => {
+                    line_count += 1;
+                    self.consume();
+                }
                 TokenType::Return => {
                     if self.peek(1).is_some() {
                         if let Some(expr) = self.parse_expression() {
@@ -114,31 +121,6 @@ impl Parser {
                         }));
                     }
 
-                    // if self.peek(0).is_some() {
-                    //     if matches!(self.peek(0).unwrap().t_type, TokenType::IntegerLiteral) {
-                    //         nodes.push(Box::new(NodeExit {
-                    //             expr: ExpressionTypes::Int(NodeExpressionInt {
-                    //                 int_literal: self.peek(0).unwrap(),
-                    //             }),
-                    //         }));
-                    //     } else if matches!(self.peek(0).unwrap().t_type, TokenType::Identifier) {
-                    //         // nodes.push(Box::new(NodeExpressionIdentifier))
-                    //         nodes.push(Box::new(NodeExit {
-                    //             expr: ExpressionTypes::Identifier(NodeExpressionIdentifier {
-                    //                 ident: self.peek(0).unwrap(),
-                    //             }),
-                    //         }));
-                    //     }
-                    // } else {
-                    //     nodes.push(Box::new(NodeExit {
-                    //         expr: ExpressionTypes::Int(NodeExpressionInt {
-                    //             int_literal: Token {
-                    //                 t_type: TokenType::IntegerLiteral,
-                    //                 value: Some("0".to_string()),
-                    //             },
-                    //         }),
-                    //     }));
-                    // }
                 }
                 TokenType::LetKeyword => {
                     if self.peek(1).is_some() && // the identifier-name self
@@ -158,32 +140,6 @@ impl Parser {
                             // weird identifier
                         }
                     }
-                    // if self.peek(0).is_some()
-                    //     && matches!(self.peek(0).unwrap().t_type, TokenType::Identifier)
-                    //     && self.peek(1).is_some()
-                    //     && matches!(self.peek(1).unwrap().t_type, TokenType::Equal)
-                    //     && self.peek(2).is_some()
-                    // {
-                    //     match self.peek(2).unwrap().t_type {
-                    //         TokenType::IntegerLiteral => {
-                    //             nodes.push(Box::new(NodeVariable {
-                    //                 identifier: self.peek(0).unwrap(),
-                    //                 expr: Box::new(NodeExpressionInt {
-                    //                     int_literal: self.peek(2).unwrap(),
-                    //                 }),
-                    //             }));
-                    //         }
-                    //         TokenType::Identifier => {
-                    //             nodes.push(Box::new(NodeVariable {
-                    //                 identifier: self.peek(0).unwrap(),
-                    //                 expr: Box::new(NodeExpressionIdentifier {
-                    //                     ident: self.peek(2).unwrap(),
-                    //                 }),
-                    //             }));
-                    //         }
-                    //         _ => {}
-                    //     }
-                    // }
                 }
                 TokenType::Identifier => {
                     if &token.value.unwrap() == "exit" {
@@ -199,44 +155,24 @@ impl Parser {
                                         expr: inside
                                     }))
                                 }
-                                else  {
-                                    return Err("Exit needs atleast one parameter (0 provided)".to_string())
-                                }
                                 self.consume(); // closing bracket
                             }
+                        else {
+                            return Err(self.prefix_error("Exit needs atleast one parameter (0 provided)", line_count));
+                        }
                         
-                        // if self.peek(0).is_some()
-                        //     && matches!(self.peek(0).unwrap().t_type, TokenType::OpenParam)
-                        //     && self.peek(2).is_some()
-                        //     && matches!(self.peek(2).unwrap().t_type, TokenType::CloseParam)
-                        // {
-                        //     if let Some(inner) = self.peek(1) {
-                        //         match inner.t_type {
-                        //             TokenType::Identifier => nodes.push(Box::new(NodeExit {
-                        //                 expr: ExpressionTypes::Identifier(
-                        //                     NodeExpressionIdentifier { ident: inner },
-                        //                 ),
-                        //             })),
-                        //             TokenType::IntegerLiteral => {
-                        //                 nodes.push(Box::new(NodeExit {
-                        //                     expr: ExpressionTypes::Int(NodeExpressionInt {
-                        //                         int_literal: inner,
-                        //                     }),
-                        //                 }));
-                        //             }
-                        //             _ => {}
-                        //         }
-                        //     }
-                        // } else {
-                        //     return Err("exit() must have one parameter".to_string());
-                        // }
                     }
+                },
+                _ => {
+                    self.consume();
                 }
-                _ => {}
             };
         }
 
         Ok(nodes)
+    }
+    fn prefix_error(&self, after: &str, line_count: usize) -> String {
+        format!("{}:{} {after}", self.filename, line_count)
     }
     fn peek(&self, offset: usize) -> Option<Token> {
         self.tokens.get(offset + self.pointer_index).cloned()

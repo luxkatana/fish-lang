@@ -2,7 +2,9 @@ mod generation;
 mod parser;
 mod tokenizer;
 use generation::CodeGeneration;
+use colored::Colorize;
 use parser::Parser;
+use std::path::Path;
 use std::fs::{read_to_string as read_file, File};
 use std::io::Write;
 use std::process::exit;
@@ -24,23 +26,23 @@ fn main() {
     let tokens = match tokenizer.tokenize() {
         Ok(e) => e,
         Err(errormsg) => {
-            eprintln!("TOKENIZER: '{errormsg}'");
+            panic_msg(format!("Tokenizer: '{errormsg}'"));
             exit(1);
         }
     };
-    let mut parser = Parser::new(tokens);
+    let mut parser = Parser::new(tokens, Path::new(&arguments[1]).file_name().unwrap().to_str().unwrap().to_string());
     let nodes = match parser.create_nodes() {
         Ok(e) => e,
         Err(error) => {
-            eprintln!("Parser: '{error}'");
-            exit(1);
+            panic_msg(format!("Parser: '{error}'"));
+            std::process::exit(1);
         }
     };
     let mut codegen = CodeGeneration::new(nodes);
     let generated_assembly = match codegen.generate_asm() {
         Ok(e) => e,
         Err(error) => {
-            eprintln!("CODEGENERATION: '{error}'");
+            panic_msg(format!("Codegeneration: '{error}'"));
             exit(1);
         }
     };
@@ -80,4 +82,8 @@ fn clean_bin() {
             }
         }
     }
+}
+
+fn panic_msg(msg: String) {
+    eprintln!("{}", msg.red());
 }
