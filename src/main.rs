@@ -46,7 +46,14 @@ fn main() {
     };
     println!("{generated_assembly}");
     clean_bin();
-    let _ = std::env::set_current_dir("bin/");
+    match std::env::set_current_dir("bin/") {
+        Err(_) => {
+            println!("BIN FOLDER DOES NOT EXIST, THEREFORE IT'LL BE CREATED");
+            let _ = std::fs::create_dir("bin/");
+            let _ = std::env::set_tcurrent_dir("bin/");
+        },
+        _ => {}
+    }
     File::create("dump.asm")
         .expect("Could not create dump file")
         .write(generated_assembly.as_bytes())

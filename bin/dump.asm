@@ -1,10 +1,8 @@
 global _start
 _start:
-    mov rax, 14
+    mov rax, 5
     push rax
-    PUSH QWORD [rsp + 0]
-    pop rax
-    push rax; y = x
+    push QWORD [rsp + 0]
     mov rax, 60
-    mov rdi, 0
+    pop rdi
     syscall
