@@ -50,7 +50,7 @@ fn main() {
         Err(_) => {
             println!("BIN FOLDER DOES NOT EXIST, THEREFORE IT'LL BE CREATED");
             let _ = std::fs::create_dir("bin/");
-            let _ = std::env::set_tcurrent_dir("bin/");
+            let _ = std::env::set_current_dir("bin/");
         },
         _ => {}
     }
