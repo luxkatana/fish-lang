@@ -60,13 +60,8 @@ impl CodeGeneration {
                     if self.variables.contains_key(identifier) {
                         return Err(format!("identifier {identifier} is already defined"));
                     }
-                    match var_node.expr.nodetype() {
-                        NodeType::ExpressionInt => {
-                            let expr = var_node
-                                .expr
-                                .as_any()
-                                .downcast_ref::<NodeExpressionInt>()
-                                .unwrap();
+                    match &var_node.expr {
+                        ExpressionTypes::Int(expr) => {
                             self.variables
                                 .insert(identifier.to_string(), self.stack_size);
                             generated_assembly += format!(
@@ -76,19 +71,11 @@ impl CodeGeneration {
                             .as_str();
                             generated_assembly += "    push rax\n";
                             self.stack_size += 1; // increasing the stack size (+1)
-                        }
-                        NodeType::ExpressionIdent => {
-                            let expr = var_node
-                                .expr
-                                .as_any()
-                                .downcast_ref::<NodeExpressionIdentifier>()
-                                .unwrap()
-                                .ident
-                                .value
-                                .as_ref()
-                                .unwrap();
+                        },
+                        ExpressionTypes::Identifier(expr) => {
                             let varident = var_node.identifier.value.as_ref().unwrap();
-                            if let Some(pointed_assignment) = self.variables.get(expr) {
+                            let assigned_var_name = expr.ident.value.as_ref().unwrap();
+                            if let Some(pointed_assignment) = self.variables.get(assigned_var_name) {
                                 generated_assembly += format!(
                                     "    PUSH QWORD [rsp + {}]\n",
                                     (self.stack_size - pointed_assignment - 1) * 8
@@ -96,16 +83,58 @@ impl CodeGeneration {
                                 .as_str();
                                 generated_assembly += "    pop rax\n";
                                 generated_assembly +=
-                                    format!("    push rax; {} = {}\n", varident, expr).as_str();
+                                    format!("    push rax; {} = {}\n", varident, assigned_var_name).as_str();
                                 self.variables.insert(varident.to_owned(), self.stack_size);
                                 self.stack_size += 1;
-                            } else {
-                                return Err(format!("Unknown variable {expr}"));
                             }
                         }
-                        _ => {}
                     }
-                }
+                    // match var_node.expr.nodetype() {
+                        // NodeType::ExpressionInt => {
+                        //     let expr = var_node
+                        //         .expr
+                        //         .as_any()
+                        //         .downcast_ref::<NodeExpressionInt>()
+                        //         .unwrap();
+                        //     self.variables
+                        //         .insert(identifier.to_string(), self.stack_size);
+                        //     generated_assembly += format!(
+                        //         "    mov rax, {}\n",
+                        //         expr.int_literal.value.as_ref().unwrap()
+                        //     )
+                        //     .as_str();
+                        //     generated_assembly += "    push rax\n";
+                        //     self.stack_size += 1; // increasing the stack size (+1)
+                        // },
+                        // NodeType::ExpressionIdent => {
+                        //     let expr = var_node
+                        //         .expr
+                        //         .as_any()
+                        //         .downcast_ref::<NodeExpressionIdentifier>()
+                        //         .unwrap()
+                        //         .ident
+                        //         .value
+                        //         .as_ref()
+                        //         .unwrap();
+                        //     let varident = var_node.identifier.value.as_ref().unwrap();
+                        //     if let Some(pointed_assignment) = self.variables.get(expr) {
+                        //         generated_assembly += format!(
+                        //             "    PUSH QWORD [rsp + {}]\n",
+                        //             (self.stack_size - pointed_assignment - 1) * 8
+                        //         )
+                        //         .as_str();
+                        //         generated_assembly += "    pop rax\n";
+                        //         generated_assembly +=
+                        //             format!("    push rax; {} = {}\n", varident, expr).as_str();
+                        //         self.variables.insert(varident.to_owned(), self.stack_size);
+                        //         self.stack_size += 1;
+                        //     } else {
+                        //         return Err(format!("Unknown variable {expr}"));
+                        //     }
+                        // }
+                    //     _ => {}
+                    // }
+                },
                 _ => {}
             }
         }

@@ -1,3 +1,1 @@
-let x = 14
-let y = x
-exit(0)
+return 10
