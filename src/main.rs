@@ -1,14 +1,8 @@
-mod generation;
-mod parser;
 mod tokenizer;
-use generation::CodeGeneration;
 use colored::Colorize;
-use parser::Parser;
-use std::path::Path;
-use std::fs::{read_to_string as read_file, File};
-use std::io::Write;
+use std::fs::read_to_string as read_file;
 use std::process::exit;
-use std::{env::args, process::Command};
+use std::env::args;
 use tokenizer::Tokenizer;
 fn main() {
     let arguments: Vec<String> = args().collect();
@@ -30,48 +24,9 @@ fn main() {
             exit(1);
         }
     };
-    let mut parser = Parser::new(tokens, Path::new(&arguments[1]).file_name().unwrap().to_str().unwrap().to_string());
-    let nodes = match parser.create_nodes() {
-        Ok(e) => e,
-        Err(error) => {
-            panic_msg(format!("Parser: '{error}'"));
-            std::process::exit(1);
-        }
-    };
-    let mut codegen = CodeGeneration::new(nodes);
-    let generated_assembly = match codegen.generate_asm() {
-        Ok(e) => e,
-        Err(error) => {
-            panic_msg(format!("Codegeneration: '{error}'"));
-            exit(1);
-        }
-    };
-    println!("{generated_assembly}");
-    clean_bin();
-    match std::env::set_current_dir("bin/") {
-        Err(_) => {
-            println!("BIN FOLDER DOES NOT EXIST, THEREFORE IT'LL BE CREATED");
-            let _ = std::fs::create_dir("bin/");
-            let _ = std::env::set_current_dir("bin/");
-        },
-        _ => {}
+    for token in tokens {
+        dbg!(token);
     }
-    File::create("dump.asm")
-        .expect("Could not create dump file")
-        .write(generated_assembly.as_bytes())
-        .expect("Could not write data to dump file './dump.asm'");
-
-    Command::new("nasm")
-        .arg("-felf64")
-        .arg("dump.asm")
-        .status()
-        .expect("Could not create object file");
-    Command::new("ld")
-        .arg("-o")
-        .arg("out.exe")
-        .arg("dump.o")
-        .status()
-        .expect("Could not link to binary");
 }
 
 fn clean_bin() {

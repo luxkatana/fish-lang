@@ -1,13 +1,8 @@
 #[derive(Clone, Debug)]
 pub enum TokenType {
-    Return,
-    IntegerLiteral,
-    LetKeyword,
     Identifier,
-    Equal,
-    OpenParam,
-    CloseParam,
-    Newline
+    IntegerLiteral,
+    Punctuation
 }
 #[derive(Clone, Debug)]
 pub struct Token {
@@ -39,14 +34,7 @@ impl Tokenizer {
                 }
                 continue;
             }
-            if character == '\n' {
-                tokens.push(Token {
-                    t_type: TokenType::Newline,
-                    value: None
-                });
-                continue;
-            }
-            else if character.is_ascii_whitespace() {
+            if character.is_ascii_whitespace() {
                 continue;
             }
 
@@ -59,22 +47,10 @@ impl Tokenizer {
                         break;
                     }
                 }
-                if buffer == "return" {
-                    tokens.push(Token {
-                        t_type: TokenType::Return,
-                        value: None,
-                    });
-                } else if buffer == "let" {
-                    tokens.push(Token {
-                        t_type: TokenType::LetKeyword,
-                        value: None,
-                    });
-                } else {
-                    tokens.push(Token {
-                        t_type: TokenType::Identifier,
-                        value: Some(buffer.clone()),
-                    })
-                }
+                tokens.push(Token {
+                    t_type: TokenType::Identifier,
+                    value: Some(buffer.clone())
+                });
                 buffer.clear();
                 self.pointer_index -= 1;
             } else if character.is_numeric() {
@@ -82,6 +58,7 @@ impl Tokenizer {
                     buffer.push(character);
                     if let Some(_) = self.peek(0) {
                         character = self.consume().unwrap();
+                        println!("{character}");
                     } else {
                         break;
                     }
@@ -92,24 +69,12 @@ impl Tokenizer {
                 });
                 buffer.clear();
                 self.pointer_index -= 1; // one to far
-            } else if character == '=' {
-                tokens.push(Token {
-                    t_type: TokenType::Equal,
-                    value: None,
-                });
-            } else if character == '(' {
-                tokens.push(Token {
-                    t_type: TokenType::OpenParam,
-                    value: None,
-                });
-            } else if character == ')' {
-                tokens.push(Token {
-                    t_type: TokenType::CloseParam,
-                    value: None,
-                });
-            } else {
-                return Err(format!("Weird character: '{character}'"));
             }
+            else {
+                println!("weird");
+            }
+        
+       
         }
 
         Ok(tokens)
